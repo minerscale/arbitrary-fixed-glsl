@@ -1,5 +1,8 @@
+use std::env;
+use std::{io, fs};
 use std::fs::File;
 use std::io::{BufWriter, Write};
+use std::path::Path;
 
 use arbitrary_fixed::ArbitraryFixed;
 
@@ -41,11 +44,8 @@ fn write_table<T: std::io::Write>(
     )
 }
 
-fn main() -> std::io::Result<()> {
-    println!("cargo:rerun-if-env-changed=FIX_SIZE");
-    println!("cargo:rerun-if-env-changed=FIX_SCALING_FACTOR");
-
-    let mut f = BufWriter::new(File::create("src/constants.glsl")?);
+fn write_constant_file(out_dir: &str) -> std::io::Result<()> {
+    let mut f = BufWriter::new(File::create(Path::new(out_dir).join("constants.glsl"))?);
 
     writeln!(f, "const uint SIZE = {};", arbitrary_fixed::SIZE)?;
     writeln!(
@@ -89,6 +89,35 @@ fn main() -> std::io::Result<()> {
         "FIX_NEG_32_DIV_17",
         -(ArbitraryFixed::from(32u32) / ArbitraryFixed::from(17u32)),
     )?;
+
+    Ok(())
+}
+
+
+
+fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
+    fs::create_dir_all(&dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let ty = entry.file_type()?;
+        if ty.is_dir() {
+            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        } else {
+            fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        }
+    }
+    Ok(())
+}
+
+fn main() -> std::io::Result<()> {
+    println!("cargo:rerun-if-env-changed=FIX_SIZE");
+    println!("cargo:rerun-if-env-changed=FIX_SCALING_FACTOR");
+    println!("cargo:rerun-if-changed=build.rs");
+
+    let out_dir = env::var("OUT_DIR").unwrap();
+
+    write_constant_file(&out_dir)?;
+    copy_dir_all("./glsl", out_dir)?;
 
     Ok(())
 }
