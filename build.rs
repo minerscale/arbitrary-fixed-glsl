@@ -45,7 +45,7 @@ fn main() -> std::io::Result<()> {
     println!("cargo:rerun-if-env-changed=FIX_SIZE");
     println!("cargo:rerun-if-env-changed=FIX_SCALING_FACTOR");
 
-    let mut f = BufWriter::new(File::create("target/constants.glsl")?);
+    let mut f = BufWriter::new(File::create("src/constants.glsl")?);
 
     writeln!(f, "const uint SIZE = {};", arbitrary_fixed::SIZE)?;
     writeln!(
