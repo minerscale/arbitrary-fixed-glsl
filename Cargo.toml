@@ -6,10 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-arbitrary-fixed = { path = "arbitrary-fixed-rs" }
-
-[workspace]
-members = ["arbitrary-fixed-rs"]
+arbitrary-fixed = { git = "https://github.com/minerscale/arbitrary-fixed-rs" }
 
 [build-dependencies]
-arbitrary-fixed = { path = "arbitrary-fixed-rs" }
+arbitrary-fixed = { git = "https://github.com/minerscale/arbitrary-fixed-rs" }
+
